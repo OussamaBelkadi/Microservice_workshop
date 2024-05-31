@@ -31,7 +31,7 @@ public class HelloWordController {
                 .path("/{id}").buildAndExpand(user1.getId()).toUri();
         return ResponseEntity.created(location).build();
     }
-    @GetMapping("users")
+    @GetMapping(path = "users")
     public ResponseEntity<List<User>> getUsers(){
         return ResponseEntity.ok().body(userDaoService.getUsers());
     }
