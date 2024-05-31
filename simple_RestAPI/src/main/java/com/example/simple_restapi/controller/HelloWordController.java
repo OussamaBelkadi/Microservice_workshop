@@ -2,14 +2,13 @@ package com.example.simple_restapi.controller;
 
 import com.example.simple_restapi.entity.User;
 import com.example.simple_restapi.service.UserDaoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 public class HelloWordController {
@@ -26,10 +25,14 @@ public class HelloWordController {
     }
 
     @PostMapping(path = "users")
-    public ResponseEntity<User> createUser(User user){
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
         User user1 = userDaoService.createUSer(user);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(user1.getId()).toUri();
         return ResponseEntity.created(location).build();
+    }
+    @GetMapping("users")
+    public ResponseEntity<List<User>> getUsers(){
+        return ResponseEntity.ok().body(userDaoService.getUsers());
     }
 }
