@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -33,14 +35,26 @@ public class HelloWordController {
     }
 
     @PostMapping(path = "users")
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
+    public ResponseEntity<EntityModel<User>> createUser(@Valid @RequestBody User user){
         User user1 = userDaoService.createUSer(user);
+        EntityModel<User> userEntityModel = EntityModel.of(user1);
+        WebMvcLinkBuilder link = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getUsers()) ;
+        userEntityModel.add(link.withRel("all-users"));
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(user1.getId()).toUri();
-        return ResponseEntity.created(location).build();
+        return ResponseEntity.created(location).body(userEntityModel);
     }
+
     @GetMapping(path = "users")
     public ResponseEntity<List<User>> getUsers(){
         return ResponseEntity.ok().body(userDaoService.getUsers());
+    }
+    @GetMapping(path = "users/{id}")
+    public ResponseEntity<EntityModel<User>> getUser(@PathVariable("id") int id){
+        User user = userDaoService.findUserById(id);
+        EntityModel<User> userEntityModel = EntityModel.of(user);
+        WebMvcLinkBuilder link = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getUsers());
+        userEntityModel.add(link.withRel("all-user"));
+        return ResponseEntity.ok().body(userEntityModel);
     }
 }
